@@ -39,12 +39,12 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Nilai SMP Negeri 2 Banawa - Informatika</h1>
-                    <p class="text-lg font-semibold text-green-600">"Semangat Digitalisasi dan Menginspirasi"</p>
+                    <p class="text-lg font-semibold text-blue-400">" Semangat Digitalisasi dan Menginspirasi untuk Pendidikan "</p>
                 </div>
                 <div class="text-right">
-                    <div class="bg-green-100 px-4 py-2 rounded-lg">
-                        <p class="text-sm text-gray-600">Tahun Ajaran</p>
-                        <p class="font-bold text-green-700" id="academicYear">2025/2026</p>
+                    <div class="bg-gray-200 px-4 py-2 rounded-lg">
+                        <p class="text-sm text-gray-400">Tahun Ajaran</p>
+                        <p class="font-bold text-gray-300" id="academicYear">2025/2026</p>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                    <input type="text" id="subjectName" value="Tabe'! sesuaikan mapel komiu sebelum export" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <input type="text" id="subjectName" value="Tulis mapel komiu disini jika unduh data" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
@@ -112,7 +112,7 @@
                                 <option value="IX-E">IX-E</option>
                             </select>
                         </div>
-                        <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-medium">
                             Tambah Siswa
                         </button>
                     </form>
@@ -197,21 +197,21 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-3">
-                        <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
-                            📊 Export Excel
+                        <button onclick="exportToExcel()" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-500 transition duration-200">
+                            Unduh Data (excel)
                         </button>
-                        <button onclick="exportToPDF()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
-                            📄 Export PDF
+                        <button onclick="exportToPDF()" class="bg-red-400 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
+                            Export PDF
                         </button>
 
-                        <button onclick="clearAllData()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200">
-                            🗑️ Hapus Semua
+                        <button onclick="clearAllData()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition duration-200">
+                           Hapus Data
                         </button>
                     </div>
                 </div>
 
                 <!-- Tabel Nilai -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-green-100 rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6 border-b border-gray-200">
                         <h2 class="text-xl font-bold text-gray-800">📋 Daftar Nilai Siswa</h2>
                         <p class="text-sm text-gray-600 mt-1">Penilaian berdasarkan Kurikulum Merdeka</p>
@@ -333,7 +333,7 @@
 
         <!-- Penjelasan Sistem Penilaian -->
         <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📚 Panduan Sistem Penilaian Kurikulum Merdeka</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Panduan Sistem Penilaian </h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Penilaian Formatif -->
@@ -511,9 +511,12 @@
                             <li>• Lakukan remedial untuk siswa yang perlu bimbingan</li>
                         </ul>
                     </div>
-                </div>
             </div>
         </div>
+ <div class="mt-3 bg-green-300 rounded shadow-lg p-2">
+            <h2 class="text-1x1 font-semibold text-green-700 mb-2 text-center">Aplikasi ini dirancang dari sistem Ai oleh Ian Dwi Putera, S.Pd (GURU TIK - SMPN 2 BANAWA)</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Success Message -->
         <div id="successMessage" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300">
