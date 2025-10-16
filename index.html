@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Nilai Semester - Kurikulum Merdeka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" integrity="sha512-H/8J+6RJBfF+zfyuxT2+sa+EAJbU9Q8LqCMPKfEhIhVCwrnyf51XWVdtJd5u3/pJaXtOBEO+UzTqWsmuBF7DdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-100 min-h-full font-sans">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header Kurikulum Merdeka -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Nilai SMP Negeri 2 Banawa - Informatika</h1>
+                    <p class="text-lg font-semibold text-green-600">"Semangat Digitalisasi dan Menginspirasi"</p>
+                </div>
+                <div class="text-right">
+                    <div class="bg-green-100 px-4 py-2 rounded-lg">
+                        <p class="text-sm text-gray-600">Tahun Ajaran</p>
+                        <p class="font-bold text-green-700" id="academicYear">2025/2026</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Mata Pelajaran -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                    <input type="text" id="subjectName" value="Tabe'! sesuaikan mapel komiu sebelum export" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
+                    <select id="phase" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="E">Fase D (Kelas VII Asoka)</option>
+                        <option value="F">Fase D (Kelas VIII Asoka)</option>
+                        <option value="F">Fase D (Kelas IX Asoka)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select id="semester" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="1">Semester 1 (Ganjil)</option>
+                        <option value="2">Semester 2 (Genap)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Input Panel -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">➕ Tambah Siswa</h2>
+                    <form id="studentForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Siswa</label>
+                            <input type="text" id="studentName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Nama lengkap siswa" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">NISN</label>
+                            <input type="text" id="studentNISN" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Nomor Induk Siswa Nasional" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                            <select id="studentClass" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                                <option value="">Pilih Kelas</option>
+                                <option value="VII-A">VII-A</option>
+                                <option value="VII-B">VII-B</option>
+                                <option value="VII-C">VII-C</option>
+                                <option value="VII-D">VII-D</option>
+                                <option value="VII-E">VII-E</option>
+                                <option value="VIII-A">VIII-A</option>
+                                <option value="VIII-B">VIII-B</option>
+                                <option value="VIII-C">VIII-C</option>
+                                <option value="VIII-D">VIII-D</option>
+                                <option value="VIII-E">VIII-E</option>
+                                <option value="IX-A">IX-A</option>
+                                <option value="IX-B">IX-B</option>
+                                <option value="IX-C">IX-C</option>
+                                <option value="IX-D">IX-D</option>
+                                <option value="IX-E">IX-E</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                            Tambah Siswa
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Pengaturan Penilaian -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">⚙️ Bobot Penilaian</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">📝 Formatif</span>
+                            <input type="number" id="formatifWeight" value="40" min="0" max="100" class="w-16 px-2 py-1 border border-gray-300 rounded text-center">
+                            <span class="text-sm text-gray-500">%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">📊 Sumatif</span>
+                            <input type="number" id="sumatifWeight" value="60" min="0" max="100" class="w-16 px-2 py-1 border border-gray-300 rounded text-center">
+                            <span class="text-sm text-gray-500">%</span>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-700">Total:</span>
+                                <span id="totalWeight" class="font-bold text-green-600">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Filter dan Actions -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 no-print">
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Filter Kelas</label>
+                            <select id="classFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
+                                <option value="">📚 Semua Kelas</option>
+                                <option value="VII-A">📖 Kelas VII-A</option>
+                                <option value="VII-B">📖 Kelas VII-B</option>
+                                <option value="VII-C">📖 Kelas VII-C</option>
+                                <option value="VII-D">📖 Kelas VII-D</option>
+                                <option value="VII-E">📖 Kelas VII-E</option>
+                                <option value="VIII-A">📘 Kelas VIII-A</option>
+                                <option value="VIII-B">📘 Kelas VIII-B</option>
+                                <option value="VIII-C">📘 Kelas VIII-C</option>
+                                <option value="VIII-D">📘 Kelas VIII-D</option>
+                                <option value="VIII-E">📘 Kelas VIII-E</option>
+                                <option value="IX-A">📙 Kelas IX-A</option>
+                                <option value="IX-B">📙 Kelas IX-B</option>
+                                <option value="IX-C">📙 Kelas IX-C</option>
+                                <option value="IX-D">📙 Kelas IX-D</option>
+                                <option value="IX-E">📙 Kelas IX-E</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📊 Filter Capaian</label>
+                            <select id="capaianFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white">
+                                <option value="">🎯 Semua Capaian</option>
+                                <option value="Sangat Baik">⭐ Sangat Baik</option>
+                                <option value="Baik">✅ Baik</option>
+                                <option value="Cukup">⚠️ Cukup</option>
+                                <option value="Perlu Bimbingan">📈 Perlu Bimbingan</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🔤 Cari Nama Siswa</label>
+                            <input type="text" id="nameFilter" placeholder="Ketik nama siswa..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        </div>
+                    </div>
+                    
+                    <!-- Info Filter Aktif -->
+                    <div id="filterInfo" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-blue-600 font-medium">🔍 Filter Aktif:</span>
+                                <span id="filterText" class="text-blue-800"></span>
+                            </div>
+                            <button onclick="clearAllFilters()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                ✕ Hapus Filter
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            📊 Export Excel
+                        </button>
+                        <button onclick="exportToPDF()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
+                            📄 Export PDF
+                        </button>
+
+                        <button onclick="clearAllData()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200">
+                            🗑️ Hapus Semua
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabel Nilai -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-xl font-bold text-gray-800">📋 Daftar Nilai Siswa</h2>
+                        <p class="text-sm text-gray-600 mt-1">Penilaian berdasarkan Kurikulum Merdeka</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-green-50">
+                                <tr>
+                                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase border-r">No</th>
+                                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase border-r">Nama Siswa</th>
+                                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase border-r">NISN</th>
+                                    <th rowspan="2" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase border-r">Kelas</th>
+                                    <th colspan="20" class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase border-r">Penilaian Formatif (40%) - Lingkup Materi</th>
+                                    <th colspan="5" class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase border-r">Penilaian Sumatif (60%) - Lingkup Materi</th>
+                                    <th rowspan="3" class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase border-r">Nilai Akhir</th>
+                                    <th rowspan="3" class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase border-r">Capaian</th>
+                                    <th rowspan="3" class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase no-print">Aksi</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="4" class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM1</th>
+                                    <th colspan="4" class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM2</th>
+                                    <th colspan="4" class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM3</th>
+                                    <th colspan="4" class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM4</th>
+                                    <th colspan="4" class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM5</th>
+                                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM1</th>
+                                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM2</th>
+                                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM3</th>
+                                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM4</th>
+                                    <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border-r">LM5</th>
+                                </tr>
+                                <tr>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-1 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP1</th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP2</th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP3</th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r">TP4</th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r"> </th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r"> </th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r"> </th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r"> </th>
+                                    <th class="px-2 py-1 text-center text-xs font-medium text-gray-700 uppercase border-r"> </th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Students will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statistik Kelas -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <span class="text-2xl">👥</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Total Siswa</p>
+                                <p class="text-2xl font-bold text-green-600" id="totalStudents">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <span class="text-2xl">📊</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Rata-rata Kelas</p>
+                                <p class="text-2xl font-bold text-blue-600" id="classAverage">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <span class="text-2xl">⭐</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Sangat Baik</p>
+                                <p class="text-2xl font-bold text-yellow-600" id="excellentCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <span class="text-2xl">📈</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Perlu Bimbingan</p>
+                                <p class="text-2xl font-bold text-red-600" id="needsGuidanceCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Penjelasan Sistem Penilaian -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📚 Panduan Sistem Penilaian Kurikulum Merdeka</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Penilaian Formatif -->
+                <div class="bg-blue-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-blue-800 mb-3 flex items-center">
+                        📝 Penilaian Formatif (40%)
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Penilaian yang dilakukan selama proses pembelajaran untuk memantau kemajuan siswa dan memberikan umpan balik.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-blue-700 mb-2">Contoh Penilaian Formatif:</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Kuis harian atau mingguan</li>
+                            <li>• Tugas rumah dan latihan</li>
+                            <li>• Diskusi kelas dan presentasi</li>
+                            <li>• Observasi aktivitas siswa</li>
+                            <li>• Proyek kecil dan praktikum</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Tujuan:</strong> Membantu guru dan siswa memahami sejauh mana pembelajaran telah tercapai dan area yang perlu diperbaiki.
+                    </p>
+                </div>
+
+                <!-- Penilaian Sumatif -->
+                <div class="bg-green-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-green-800 mb-3 flex items-center">
+                        📊 Penilaian Sumatif (60%)
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Penilaian yang dilakukan di akhir periode pembelajaran untuk mengukur pencapaian kompetensi siswa secara keseluruhan.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-green-700 mb-2">Contoh Penilaian Sumatif:</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Ulangan harian (UH)</li>
+                            <li>• Ujian tengah semester (UTS)</li>
+                            <li>• Ujian akhir semester (UAS)</li>
+                            <li>• Proyek akhir atau portofolio</li>
+                            <li>• Ujian praktik dan keterampilan</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Tujuan:</strong> Menentukan tingkat pencapaian kompetensi siswa dan memberikan nilai akhir untuk pelaporan.
+                    </p>
+                </div>
+
+                <!-- Tujuan Pembelajaran (TP) -->
+                <div class="bg-yellow-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-yellow-800 mb-3 flex items-center">
+                        🎯 Tujuan Pembelajaran (TP1, TP2, TP3, TP4)
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Tujuan pembelajaran spesifik yang harus dicapai siswa dalam setiap lingkup materi.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-yellow-700 mb-2">Contoh untuk Matematika - Aljabar:</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li><strong>TP1:</strong> Memahami konsep variabel dan konstanta</li>
+                            <li><strong>TP2:</strong> Melakukan operasi penjumlahan aljabar</li>
+                            <li><strong>TP3:</strong> Melakukan operasi pengurangan aljabar</li>
+                            <li><strong>TP4:</strong> Menyelesaikan persamaan linear sederhana</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Fungsi:</strong> Memecah kompetensi besar menjadi bagian-bagian kecil yang dapat diukur dan dicapai secara bertahap.
+                    </p>
+                </div>
+
+                <!-- Lingkup Materi (LM) -->
+                <div class="bg-purple-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-purple-800 mb-3 flex items-center">
+                        📖 Lingkup Materi (LM1, LM2, LM3, LM4, LM5)
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Pembagian materi pembelajaran dalam satu semester menjadi beberapa lingkup atau bab utama.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-purple-700 mb-2">Contoh untuk Matematika Kelas X:</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li><strong>LM1:</strong> Eksponen dan Logaritma</li>
+                            <li><strong>LM2:</strong> Persamaan dan Pertidaksamaan</li>
+                            <li><strong>LM3:</strong> Sistem Persamaan Linear</li>
+                            <li><strong>LM4:</strong> Fungsi dan Grafik</li>
+                            <li><strong>LM5:</strong> Trigonometri Dasar</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Fungsi:</strong> Mengorganisir pembelajaran secara sistematis dan memudahkan penilaian per topik.
+                    </p>
+                </div>
+
+                <!-- Nilai Akhir -->
+                <div class="bg-indigo-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-indigo-800 mb-3 flex items-center">
+                        🏆 Nilai Akhir
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Nilai gabungan dari penilaian formatif dan sumatif dengan bobot tertentu.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-indigo-700 mb-2">Rumus Perhitungan:</p>
+                        <div class="text-sm text-gray-600 space-y-2">
+                            <p><strong>Nilai Akhir = (Rata-rata Formatif × 40%) + (Rata-rata Sumatif × 60%)</strong></p>
+                            <div class="bg-gray-100 p-2 rounded">
+                                <p><strong>Contoh:</strong></p>
+                                <p>• Rata-rata Formatif: 80</p>
+                                <p>• Rata-rata Sumatif: 85</p>
+                                <p>• Nilai Akhir = (80 × 0.4) + (85 × 0.6) = 32 + 51 = <strong>83</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Rentang:</strong> 0-100, dengan pembulatan ke bilangan bulat terdekat.
+                    </p>
+                </div>
+
+                <!-- Capaian -->
+                <div class="bg-red-50 rounded-lg p-5">
+                    <h3 class="text-lg font-bold text-red-800 mb-3 flex items-center">
+                        ⭐ Capaian Pembelajaran
+                    </h3>
+                    <p class="text-gray-700 mb-3">
+                        <strong>Apa itu:</strong> Kategori pencapaian kompetensi siswa berdasarkan nilai akhir yang diperoleh.
+                    </p>
+                    <div class="bg-white rounded p-3 mb-3">
+                        <p class="font-semibold text-red-700 mb-2">Kategori Capaian:</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between p-2 bg-green-100 rounded">
+                                <span class="font-medium">⭐ Sangat Baik</span>
+                                <span class="text-green-700 font-bold">85-100</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-blue-100 rounded">
+                                <span class="font-medium">✅ Baik</span>
+                                <span class="text-blue-700 font-bold">70-84</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-yellow-100 rounded">
+                                <span class="font-medium">⚠️ Cukup</span>
+                                <span class="text-yellow-700 font-bold">55-69</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-red-100 rounded">
+                                <span class="font-medium">📈 Perlu Bimbingan</span>
+                                <span class="text-red-700 font-bold">0-54</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600">
+                        <strong>Fungsi:</strong> Memberikan gambaran jelas tentang tingkat penguasaan kompetensi siswa untuk tindak lanjut pembelajaran.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tips Penggunaan -->
+            <div class="mt-6 bg-gray-50 rounded-lg p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                    💡 Tips Penggunaan Sistem Penilaian
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div>
+                        <h4 class="font-semibold mb-2">✅ Yang Perlu Dilakukan:</h4>
+                        <ul class="space-y-1">
+                            <li>• Lakukan penilaian formatif secara berkala</li>
+                            <li>• Berikan umpan balik konstruktif kepada siswa</li>
+                            <li>• Dokumentasikan semua hasil penilaian</li>
+                            <li>• Sesuaikan bobot penilaian dengan kebijakan sekolah</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">⚠️ Yang Perlu Diperhatikan:</h4>
+                        <ul class="space-y-1">
+                            <li>• Pastikan total bobot formatif + sumatif = 100%</li>
+                            <li>• Setiap TP harus dinilai minimal 2 kali</li>
+                            <li>• Gunakan rubrik penilaian yang jelas</li>
+                            <li>• Lakukan remedial untuk siswa yang perlu bimbingan</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300">
+            <span id="successText">Berhasil!</span>
+        </div>
+    </div>
+
+    <script>
+        let students = JSON.parse(localStorage.getItem('kurikulumMerdekaData')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderStudents();
+            updateStats();
+            updateWeightTotal();
+            
+            // Add event listeners
+            ['formatifWeight', 'sumatifWeight'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateWeightTotal);
+            });
+
+            document.getElementById('classFilter').addEventListener('change', renderStudents);
+            document.getElementById('capaianFilter').addEventListener('change', renderStudents);
+            document.getElementById('nameFilter').addEventListener('input', renderStudents);
+        });
+
+        // Add student form handler
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('studentName').value;
+            const nisn = document.getElementById('studentNISN').value;
+            const studentClass = document.getElementById('studentClass').value;
+            
+            // Check if NISN already exists
+            if (students.some(student => student.nisn === nisn)) {
+                showMessage('NISN sudah ada!', 'error');
+                return;
+            }
+            
+            const newStudent = {
+                id: Date.now(),
+                name: name,
+                nisn: nisn,
+                class: studentClass,
+                formatif: {
+                    lm1: { tp1: 0, tp2: 0, tp3: 0, tp4: 0 },
+                    lm2: { tp1: 0, tp2: 0, tp3: 0, tp4: 0 },
+                    lm3: { tp1: 0, tp2: 0, tp3: 0, tp4: 0 },
+                    lm4: { tp1: 0, tp2: 0, tp3: 0, tp4: 0 },
+                    lm5: { tp1: 0, tp2: 0, tp3: 0, tp4: 0 }
+                },
+                sumatif: {
+                    lm1: 0,
+                    lm2: 0,
+                    lm3: 0,
+                    lm4: 0,
+                    lm5: 0
+                },
+                nilaiAkhir: 0,
+                capaian: 'Perlu Bimbingan'
+            };
+            
+            students.push(newStudent);
+            saveData();
+            renderStudents();
+            updateStats();
+            
+            // Reset form
+            document.getElementById('studentForm').reset();
+            showMessage('Siswa berhasil ditambahkan!');
+        });
+
+
+
+        function updateWeightTotal() {
+            const formatif = parseInt(document.getElementById('formatifWeight').value) || 0;
+            const sumatif = parseInt(document.getElementById('sumatifWeight').value) || 0;
+            
+            const total = formatif + sumatif;
+            document.getElementById('totalWeight').textContent = total + '%';
+            document.getElementById('totalWeight').className = total === 100 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+            
+            // Recalculate all scores
+            students.forEach(student => {
+                calculateFinalScore(student);
+            });
+            renderStudents();
+            updateStats();
+        }
+
+        function calculateFinalScore(student) {
+            const formatifWeight = parseInt(document.getElementById('formatifWeight').value) || 0;
+            const sumatifWeight = parseInt(document.getElementById('sumatifWeight').value) || 0;
+            
+            // Calculate formatif average (average of all TP scores across all LM)
+            let formatifTotal = 0;
+            let formatifCount = 0;
+            
+            ['lm1', 'lm2', 'lm3', 'lm4', 'lm5'].forEach(lm => {
+                if (student.formatif[lm]) {
+                    ['tp1', 'tp2', 'tp3', 'tp4'].forEach(tp => {
+                        formatifTotal += student.formatif[lm][tp] || 0;
+                        formatifCount++;
+                    });
+                }
+            });
+            
+            const formatifAvg = formatifCount > 0 ? formatifTotal / formatifCount : 0;
+            
+            // Calculate sumatif average
+            const sumatifTotal = (student.sumatif.lm1 || 0) + (student.sumatif.lm2 || 0) + (student.sumatif.lm3 || 0) + (student.sumatif.lm4 || 0) + (student.sumatif.lm5 || 0);
+            const sumatifAvg = sumatifTotal / 5;
+            
+            // Calculate final score
+            const totalWeight = formatifWeight + sumatifWeight;
+            if (totalWeight > 0) {
+                student.nilaiAkhir = Math.round((formatifAvg * formatifWeight + sumatifAvg * sumatifWeight) / totalWeight);
+            } else {
+                student.nilaiAkhir = 0;
+            }
+            
+            // Determine capaian based on Kurikulum Merdeka
+            student.capaian = getCapaian(student.nilaiAkhir);
+        }
+
+        function getCapaian(score) {
+            if (score >= 85) return 'Sangat Baik';
+            if (score >= 70) return 'Baik';
+            if (score >= 55) return 'Cukup';
+            return 'Perlu Bimbingan';
+        }
+
+        function getCapaianColor(capaian) {
+            const colors = {
+                'Sangat Baik': 'bg-green-100 text-green-800',
+                'Baik': 'bg-blue-100 text-blue-800',
+                'Cukup': 'bg-yellow-100 text-yellow-800',
+                'Perlu Bimbingan': 'bg-red-100 text-red-800'
+            };
+            return colors[capaian] || 'bg-gray-100 text-gray-800';
+        }
+
+        function renderStudents() {
+            const tbody = document.getElementById('studentsTableBody');
+            const classFilter = document.getElementById('classFilter').value;
+            const capaianFilter = document.getElementById('capaianFilter').value;
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            tbody.innerHTML = '';
+            
+            let filteredStudents = students;
+            
+            // Apply filters
+            if (classFilter) {
+                filteredStudents = filteredStudents.filter(student => student.class === classFilter);
+            }
+            
+            if (capaianFilter) {
+                filteredStudents = filteredStudents.filter(student => student.capaian === capaianFilter);
+            }
+            
+            if (nameFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.name.toLowerCase().includes(nameFilter) || 
+                    student.nisn.includes(nameFilter)
+                );
+            }
+            
+            // Update filter info
+            updateFilterInfo(classFilter, capaianFilter, nameFilter, filteredStudents.length);
+            
+            filteredStudents.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 fade-in';
+                row.innerHTML = `
+                    <td class="px-4 py-4 text-center font-medium text-gray-900 border-r">${index + 1}</td>
+                    <td class="px-4 py-4 whitespace-nowrap border-r">
+                        <div class="font-medium text-gray-900">${student.name}</div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-600 border-r">${student.nisn}</td>
+                    <td class="px-4 py-4 whitespace-nowrap border-r">
+                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${student.class}</span>
+                    </td>
+                    <!-- Formatif LM1 -->
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm1?.tp1 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm1.tp1', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm1?.tp2 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm1.tp2', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm1?.tp3 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm1.tp3', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm1?.tp4 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm1.tp4', this.value)">
+                    </td>
+                    <!-- Formatif LM2 -->
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm2?.tp1 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm2.tp1', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm2?.tp2 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm2.tp2', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm2?.tp3 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm2.tp3', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm2?.tp4 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm2.tp4', this.value)">
+                    </td>
+                    <!-- Formatif LM3 -->
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm3?.tp1 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm3.tp1', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm3?.tp2 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm3.tp2', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm3?.tp3 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm3.tp3', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm3?.tp4 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm3.tp4', this.value)">
+                    </td>
+                    <!-- Formatif LM4 -->
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm4?.tp1 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm4.tp1', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm4?.tp2 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm4.tp2', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm4?.tp3 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm4.tp3', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm4?.tp4 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm4.tp4', this.value)">
+                    </td>
+                    <!-- Formatif LM5 -->
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm5?.tp1 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm5.tp1', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm5?.tp2 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm5.tp2', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm5?.tp3 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm5.tp3', this.value)">
+                    </td>
+                    <td class="px-1 py-4 text-center border-r">
+                        <input type="number" value="${student.formatif?.lm5?.tp4 || 0}" min="0" max="100" 
+                               class="w-10 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'formatif', 'lm5.tp4', this.value)">
+                    </td>
+                    <!-- Sumatif -->
+                    <td class="px-2 py-4 text-center border-r">
+                        <input type="number" value="${student.sumatif?.lm1 || 0}" min="0" max="100" 
+                               class="w-14 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'sumatif', 'lm1', this.value)">
+                    </td>
+                    <td class="px-2 py-4 text-center border-r">
+                        <input type="number" value="${student.sumatif?.lm2 || 0}" min="0" max="100" 
+                               class="w-14 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'sumatif', 'lm2', this.value)">
+                    </td>
+                    <td class="px-2 py-4 text-center border-r">
+                        <input type="number" value="${student.sumatif?.lm3 || 0}" min="0" max="100" 
+                               class="w-14 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'sumatif', 'lm3', this.value)">
+                    </td>
+                    <td class="px-2 py-4 text-center border-r">
+                        <input type="number" value="${student.sumatif?.lm4 || 0}" min="0" max="100" 
+                               class="w-14 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'sumatif', 'lm4', this.value)">
+                    </td>
+                    <td class="px-2 py-4 text-center border-r">
+                        <input type="number" value="${student.sumatif?.lm5 || 0}" min="0" max="100" 
+                               class="w-14 px-1 py-1 border border-gray-300 rounded text-center text-xs"
+                               onchange="updateScore(${student.id}, 'sumatif', 'lm5', this.value)">
+                    </td>
+                    <td class="px-4 py-4 text-center border-r">
+                        <span class="font-bold text-lg ${student.nilaiAkhir >= 70 ? 'text-green-600' : 'text-red-600'}">${student.nilaiAkhir}</span>
+                    </td>
+                    <td class="px-4 py-4 text-center border-r">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${getCapaianColor(student.capaian)}">${student.capaian}</span>
+                    </td>
+                    <td class="px-4 py-4 text-center no-print">
+                        <button onclick="deleteStudent(${student.id})" 
+                                class="text-red-600 hover:text-red-800 font-medium text-sm">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateScore(studentId, category, type, value) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                // Ensure the category exists
+                if (!student[category]) {
+                    student[category] = {};
+                }
+                
+                // Handle nested properties (e.g., 'lm1.tp1')
+                if (type.includes('.')) {
+                    const [lm, tp] = type.split('.');
+                    if (!student[category][lm]) {
+                        student[category][lm] = {};
+                    }
+                    student[category][lm][tp] = parseInt(value) || 0;
+                } else {
+                    student[category][type] = parseInt(value) || 0;
+                }
+                
+                calculateFinalScore(student);
+                saveData();
+                renderStudents();
+                updateStats();
+            }
+        }
+
+        function deleteStudent(studentId) {
+            students = students.filter(s => s.id !== studentId);
+            saveData();
+            renderStudents();
+            updateStats();
+            showMessage('Siswa berhasil dihapus!');
+        }
+
+        function updateStats() {
+            const classFilter = document.getElementById('classFilter').value;
+            const capaianFilter = document.getElementById('capaianFilter').value;
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            
+            let filteredStudents = students;
+            
+            // Apply same filters as renderStudents
+            if (classFilter) {
+                filteredStudents = filteredStudents.filter(student => student.class === classFilter);
+            }
+            
+            if (capaianFilter) {
+                filteredStudents = filteredStudents.filter(student => student.capaian === capaianFilter);
+            }
+            
+            if (nameFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.name.toLowerCase().includes(nameFilter) || 
+                    student.nisn.includes(nameFilter)
+                );
+            }
+
+            document.getElementById('totalStudents').textContent = filteredStudents.length;
+            
+            if (filteredStudents.length > 0) {
+                const classAvg = Math.round(filteredStudents.reduce((sum, student) => sum + student.nilaiAkhir, 0) / filteredStudents.length);
+                document.getElementById('classAverage').textContent = classAvg;
+                
+                const excellentCount = filteredStudents.filter(student => student.capaian === 'Sangat Baik').length;
+                document.getElementById('excellentCount').textContent = excellentCount;
+                
+                const needsGuidanceCount = filteredStudents.filter(student => student.capaian === 'Perlu Bimbingan').length;
+                document.getElementById('needsGuidanceCount').textContent = needsGuidanceCount;
+            } else {
+                document.getElementById('classAverage').textContent = '0';
+                document.getElementById('excellentCount').textContent = '0';
+                document.getElementById('needsGuidanceCount').textContent = '0';
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('kurikulumMerdekaData', JSON.stringify(students));
+        }
+
+        function showMessage(text, type = 'success') {
+            const message = document.getElementById('successMessage');
+            const messageText = document.getElementById('successText');
+            
+            messageText.textContent = text;
+            message.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300 ${
+                type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+            }`;
+            
+            message.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+                message.style.transform = 'translateX(100%)';
+            }, 3000);
+        }
+
+        function exportToExcel() {
+            const classFilter = document.getElementById('classFilter').value;
+            const capaianFilter = document.getElementById('capaianFilter').value;
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            
+            let filteredStudents = students;
+            
+            // Apply same filters
+            if (classFilter) {
+                filteredStudents = filteredStudents.filter(student => student.class === classFilter);
+            }
+            
+            if (capaianFilter) {
+                filteredStudents = filteredStudents.filter(student => student.capaian === capaianFilter);
+            }
+            
+            if (nameFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.name.toLowerCase().includes(nameFilter) || 
+                    student.nisn.includes(nameFilter)
+                );
+            }
+
+            if (filteredStudents.length === 0) {
+                showMessage('Tidak ada data untuk diekspor!', 'error');
+                return;
+            }
+
+            try {
+                // Check if XLSX is available
+                if (typeof XLSX === 'undefined') {
+                    showMessage('Library Excel tidak tersedia. Silakan refresh halaman.', 'error');
+                    return;
+                }
+
+                const ws_data = [
+                    ['DAFTAR NILAI SEMESTER - KURIKULUM MERDEKA'],
+                    ['Mata Pelajaran: ' + document.getElementById('subjectName').value],
+                    ['Fase: ' + document.getElementById('phase').value],
+                    ['Semester: ' + document.getElementById('semester').value],
+                    ['Tanggal Cetak: ' + new Date().toLocaleDateString('id-ID')],
+                    [''],
+                    ['No', 'Nama Siswa', 'NISN', 'Kelas', 
+                     'LM1-TP1', 'LM1-TP2', 'LM1-TP3', 'LM1-TP4',
+                     'LM2-TP1', 'LM2-TP2', 'LM2-TP3', 'LM2-TP4',
+                     'LM3-TP1', 'LM3-TP2', 'LM3-TP3', 'LM3-TP4',
+                     'LM4-TP1', 'LM4-TP2', 'LM4-TP3', 'LM4-TP4',
+                     'LM5-TP1', 'LM5-TP2', 'LM5-TP3', 'LM5-TP4',
+                     'Sum-LM1', 'Sum-LM2', 'Sum-LM3', 'Sum-LM4', 'Sum-LM5',
+                     'Nilai Akhir', 'Capaian']
+                ];
+                
+                filteredStudents.forEach((student, index) => {
+                    ws_data.push([
+                        index + 1,
+                        student.name || '',
+                        student.nisn || '',
+                        student.class || '',
+                        student.formatif?.lm1?.tp1 || 0,
+                        student.formatif?.lm1?.tp2 || 0,
+                        student.formatif?.lm1?.tp3 || 0,
+                        student.formatif?.lm1?.tp4 || 0,
+                        student.formatif?.lm2?.tp1 || 0,
+                        student.formatif?.lm2?.tp2 || 0,
+                        student.formatif?.lm2?.tp3 || 0,
+                        student.formatif?.lm2?.tp4 || 0,
+                        student.formatif?.lm3?.tp1 || 0,
+                        student.formatif?.lm3?.tp2 || 0,
+                        student.formatif?.lm3?.tp3 || 0,
+                        student.formatif?.lm3?.tp4 || 0,
+                        student.formatif?.lm4?.tp1 || 0,
+                        student.formatif?.lm4?.tp2 || 0,
+                        student.formatif?.lm4?.tp3 || 0,
+                        student.formatif?.lm4?.tp4 || 0,
+                        student.formatif?.lm5?.tp1 || 0,
+                        student.formatif?.lm5?.tp2 || 0,
+                        student.formatif?.lm5?.tp3 || 0,
+                        student.formatif?.lm5?.tp4 || 0,
+                        student.sumatif?.lm1 || 0,
+                        student.sumatif?.lm2 || 0,
+                        student.sumatif?.lm3 || 0,
+                        student.sumatif?.lm4 || 0,
+                        student.sumatif?.lm5 || 0,
+                        student.nilaiAkhir || 0,
+                        student.capaian || 'Perlu Bimbingan'
+                    ]);
+                });
+                
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                
+                // Set column widths
+                const colWidths = [
+                    { wch: 5 },   // No
+                    { wch: 20 },  // Nama
+                    { wch: 15 },  // NISN
+                    { wch: 8 },   // Kelas
+                    { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, // LM1
+                    { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, // LM2
+                    { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, // LM3
+                    { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, // LM4
+                    { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, // LM5
+                    { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, // Sumatif
+                    { wch: 12 }, // Nilai Akhir
+                    { wch: 15 }  // Capaian
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Daftar Nilai");
+                
+                // Generate filename
+                const timestamp = new Date().toISOString().slice(0, 10);
+                const filename = classFilter ? 
+                    `daftar_nilai_${classFilter}_${timestamp}.xlsx` : 
+                    `daftar_nilai_kurikulum_merdeka_${timestamp}.xlsx`;
+                
+                // Write file
+                XLSX.writeFile(wb, filename);
+                
+                showMessage('Data berhasil diekspor ke Excel!');
+                
+            } catch (error) {
+                console.error('Error exporting Excel:', error);
+                showMessage('Gagal mengekspor Excel. Silakan coba lagi.', 'error');
+            }
+        }
+
+        function exportToPDF() {
+            const classFilter = document.getElementById('classFilter').value;
+            const capaianFilter = document.getElementById('capaianFilter').value;
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            
+            let filteredStudents = students;
+            
+            // Apply same filters
+            if (classFilter) {
+                filteredStudents = filteredStudents.filter(student => student.class === classFilter);
+            }
+            
+            if (capaianFilter) {
+                filteredStudents = filteredStudents.filter(student => student.capaian === capaianFilter);
+            }
+            
+            if (nameFilter) {
+                filteredStudents = filteredStudents.filter(student => 
+                    student.name.toLowerCase().includes(nameFilter) || 
+                    student.nisn.includes(nameFilter)
+                );
+            }
+
+            if (filteredStudents.length === 0) {
+                showMessage('Tidak ada data untuk diekspor!', 'error');
+                return;
+            }
+
+            try {
+                // Check if jsPDF is available
+                if (typeof window.jspdf === 'undefined') {
+                    showMessage('Library PDF tidak tersedia. Silakan refresh halaman.', 'error');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                
+                // Check if autoTable is available
+                if (typeof jsPDF.API.autoTable === 'undefined') {
+                    showMessage('Plugin AutoTable tidak tersedia. Silakan refresh halaman.', 'error');
+                    return;
+                }
+
+                const doc = new jsPDF('landscape', 'mm', 'a4');
+                
+                // Header
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DAFTAR NILAI SEMESTER - KURIKULUM MERDEKA', 148, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Mata Pelajaran: ${document.getElementById('subjectName').value}`, 20, 35);
+                doc.text(`Fase: ${document.getElementById('phase').value}`, 20, 45);
+                doc.text(`Semester: ${document.getElementById('semester').value}`, 20, 55);
+                doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 20, 65);
+                
+                // Prepare table data
+                const tableData = filteredStudents.map((student, index) => {
+                    // Calculate LM averages for display
+                    const lm1Avg = Math.round(((student.formatif?.lm1?.tp1 || 0) + (student.formatif?.lm1?.tp2 || 0) + (student.formatif?.lm1?.tp3 || 0) + (student.formatif?.lm1?.tp4 || 0)) / 4);
+                    const lm2Avg = Math.round(((student.formatif?.lm2?.tp1 || 0) + (student.formatif?.lm2?.tp2 || 0) + (student.formatif?.lm2?.tp3 || 0) + (student.formatif?.lm2?.tp4 || 0)) / 4);
+                    const lm3Avg = Math.round(((student.formatif?.lm3?.tp1 || 0) + (student.formatif?.lm3?.tp2 || 0) + (student.formatif?.lm3?.tp3 || 0) + (student.formatif?.lm3?.tp4 || 0)) / 4);
+                    const lm4Avg = Math.round(((student.formatif?.lm4?.tp1 || 0) + (student.formatif?.lm4?.tp2 || 0) + (student.formatif?.lm4?.tp3 || 0) + (student.formatif?.lm4?.tp4 || 0)) / 4);
+                    const lm5Avg = Math.round(((student.formatif?.lm5?.tp1 || 0) + (student.formatif?.lm5?.tp2 || 0) + (student.formatif?.lm5?.tp3 || 0) + (student.formatif?.lm5?.tp4 || 0)) / 4);
+                    
+                    return [
+                        index + 1,
+                        student.name || '',
+                        student.nisn || '',
+                        student.class || '',
+                        lm1Avg,
+                        lm2Avg,
+                        lm3Avg,
+                        lm4Avg,
+                        lm5Avg,
+                        student.sumatif?.lm1 || 0,
+                        student.sumatif?.lm2 || 0,
+                        student.sumatif?.lm3 || 0,
+                        student.sumatif?.lm4 || 0,
+                        student.sumatif?.lm5 || 0,
+                        student.nilaiAkhir || 0,
+                        student.capaian || 'Perlu Bimbingan'
+                    ];
+                });
+                
+                // Create table using autoTable
+                doc.autoTable({
+                    head: [['No', 'Nama Siswa', 'NISN', 'Kelas', 'LM1\n(Formatif)', 'LM2\n(Formatif)', 'LM3\n(Formatif)', 'LM4\n(Formatif)', 'LM5\n(Formatif)', 'LM1\n(Sumatif)', 'LM2\n(Sumatif)', 'LM3\n(Sumatif)', 'LM4\n(Sumatif)', 'LM5\n(Sumatif)', 'Nilai\nAkhir', 'Capaian']],
+                    body: tableData,
+                    startY: 75,
+                    styles: {
+                        fontSize: 8,
+                        cellPadding: 2,
+                        halign: 'center',
+                        valign: 'middle'
+                    },
+                    headStyles: {
+                        fillColor: [34, 197, 94],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 7
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 10 },  // No
+                        1: { cellWidth: 25, halign: 'left' },  // Nama
+                        2: { cellWidth: 20 },  // NISN
+                        3: { cellWidth: 12 },  // Kelas
+                        4: { cellWidth: 15 },  // LM1 Formatif
+                        5: { cellWidth: 15 },  // LM2 Formatif
+                        6: { cellWidth: 15 },  // LM3 Formatif
+                        7: { cellWidth: 15 },  // LM4 Formatif
+                        8: { cellWidth: 15 },  // LM5 Formatif
+                        9: { cellWidth: 15 },  // LM1 Sumatif
+                        10: { cellWidth: 15 }, // LM2 Sumatif
+                        11: { cellWidth: 15 }, // LM3 Sumatif
+                        12: { cellWidth: 15 }, // LM4 Sumatif
+                        13: { cellWidth: 15 }, // LM5 Sumatif
+                        14: { cellWidth: 15, fontStyle: 'bold' }, // Nilai Akhir
+                        15: { cellWidth: 20, halign: 'left' }  // Capaian
+                    },
+                    alternateRowStyles: {
+                        fillColor: [249, 250, 251]
+                    },
+                    margin: { top: 75, left: 10, right: 10 }
+                });
+                
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.text(`Halaman ${i} dari ${pageCount}`, 148, 200, { align: 'center' });
+                    doc.text('Dicetak dari Sistem Penilaian Kurikulum Merdeka', 148, 205, { align: 'center' });
+                }
+                
+                // Generate filename with timestamp
+                const timestamp = new Date().toISOString().slice(0, 10);
+                const filename = classFilter ? 
+                    `daftar_nilai_${classFilter}_${timestamp}.pdf` : 
+                    `daftar_nilai_kurikulum_merdeka_${timestamp}.pdf`;
+                
+                doc.save(filename);
+                showMessage('Data berhasil diekspor ke PDF!');
+                
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                showMessage('Gagal mengekspor PDF: ' + error.message, 'error');
+            }
+        }
+
+
+
+        function clearAllData() {
+            if (students.length === 0) {
+                showMessage('Tidak ada data untuk dihapus!', 'error');
+                return;
+            }
+            
+            // Create confirmation dialog
+            const confirmDiv = document.createElement('div');
+            confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            confirmDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Konfirmasi Hapus</h3>
+                    <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus semua data siswa?</p>
+                    <div class="flex gap-3">
+                        <button onclick="confirmClearData()" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">Ya, Hapus</button>
+                        <button onclick="cancelClearData()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">Batal</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmDiv);
+        }
+
+        function confirmClearData() {
+            students = [];
+            saveData();
+            renderStudents();
+            updateStats();
+            document.body.removeChild(document.querySelector('.fixed.inset-0'));
+            showMessage('Semua data berhasil dihapus!');
+        }
+
+        function cancelClearData() {
+            document.body.removeChild(document.querySelector('.fixed.inset-0'));
+        }
+
+        function updateFilterInfo(classFilter, capaianFilter, nameFilter, resultCount) {
+            const filterInfo = document.getElementById('filterInfo');
+            const filterText = document.getElementById('filterText');
+            
+            const activeFilters = [];
+            
+            if (classFilter) activeFilters.push(`Kelas: ${classFilter}`);
+            if (capaianFilter) activeFilters.push(`Capaian: ${capaianFilter}`);
+            if (nameFilter) activeFilters.push(`Nama: "${nameFilter}"`);
+            
+            if (activeFilters.length > 0) {
+                filterText.textContent = `${activeFilters.join(', ')} (${resultCount} siswa ditemukan)`;
+                filterInfo.classList.remove('hidden');
+            } else {
+                filterInfo.classList.add('hidden');
+            }
+        }
+
+        function clearAllFilters() {
+            document.getElementById('classFilter').value = '';
+            document.getElementById('capaianFilter').value = '';
+            document.getElementById('nameFilter').value = '';
+            renderStudents();
+            updateStats();
+            showMessage('Filter berhasil dihapus!');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98f5c21d42535fea',t:'MTc2MDU5ODg1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
